@@ -7,7 +7,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 @SpringBootApplication
 public class BoardApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(BoardApplication.class, args);
     }

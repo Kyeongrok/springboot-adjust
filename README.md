@@ -25,18 +25,18 @@ UserDao.java
 ```java
 @Repository
 public class UserDao {
+    private final DataSource dataSource;
 
-    private final JdbcTemplate jdbcTemplate;
-
-    public UserDao(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    public UserDao(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
-    public void add(User user) {
-        jdbcTemplate.update("insert into users(id, name, password) values(?, ?, ?);",
-                user.getId(), user.getName(), user.getPassword());
-    }
-}
+    public void jdbcContextWithStatementStrategy(StatementStrategy stmt) throws SQLException {
+        Connection c = null;
+        PreparedStatement ps = null;
+        try {
+            c = dataSource.getConnection();
+            //...
 ```
 
 User.java

@@ -1,22 +1,51 @@
 package com.likelion.board.dao;
 
 import com.likelion.board.domain.User;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 @Repository
 public class UserDao {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final DataSource dataSource;
 
-    public UserDao(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    public UserDao(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
-    public void add(User user) {
-        jdbcTemplate.update("insert into users(id, name, password) values(?, ?, ?);",
-        user.getId(), user.getName(), user.getPassword());
+
+    public void jdbcContextWithStatementStrategy(StatementStrategy stmt) throws SQLException {
+        Connection c = null;
+        PreparedStatement ps = null;
+        try {
+            c = dataSource.getConnection();
+            ps = stmt.makePreparedStatement(c
+            );
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw e;
+        } finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                }
+            }
+            if (c != null) {
+                try {
+                    c.close();
+                } catch (SQLException e) {
+                }
+            }
+        }
+    }
+
+    public void add(User user) throws SQLException {
+        AddStrategy addStrategy = new AddStrategy(user);
+        jdbcContextWithStatementStrategy(addStrategy);
     }
 }
